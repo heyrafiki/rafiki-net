@@ -39,8 +39,8 @@ Sandbox keys return synthetic data.
 
 ## Covered Care
 
-Each write takes a caller-owned idempotency key. Reuse the same key when retrying
-the same operation.
+Each retryable Care write requires a caller-owned idempotency key. Reuse the same
+key when retrying the same operation.
 
 ```csharp
 using Heyrafiki.Models;
