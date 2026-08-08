@@ -1,0 +1,10 @@
+**/bin/
+**/obj/
+TestResults/
+artifacts/
+eng/node_modules/
+*.nupkg
+*.snupkg
+.idea/
+.vs/
+.vscode/

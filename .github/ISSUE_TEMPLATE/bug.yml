@@ -1,0 +1,43 @@
+name: Bug report
+description: Report reproducible SDK behavior.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Remove API keys, personal information, health information and production payloads.
+  - type: input
+    id: version
+    attributes:
+      label: SDK version or commit
+    validations:
+      required: true
+  - type: dropdown
+    id: framework
+    attributes:
+      label: Target framework
+      options:
+        - .NET Standard 2.0
+        - .NET 8
+        - .NET 10
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Provide a minimal synthetic example.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+    validations:
+      required: true

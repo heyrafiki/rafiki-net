@@ -1,0 +1,78 @@
+name: Quality
+
+on:
+  pull_request:
+    branches: [main, staging, raw]
+  push:
+    branches: [main]
+
+concurrency:
+  group: dotnet-sdk-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: blacksmith-2vcpu-ubuntu-2404-arm
+    timeout-minutes: 10
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      DOTNET_NOLOGO: "1"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Use .NET SDK
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: "**/packages.lock.json"
+
+      - name: Use Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: eng/package-lock.json
+
+      - name: Verify generated models against the pinned contract
+        shell: bash
+        run: |
+          curl --fail --silent --show-error --location \
+            --output "$RUNNER_TEMP/openapi.yaml" \
+            https://raw.githubusercontent.com/heyrafiki/openapi/327e0a70de92771d3930380ce552c00e0ed8fc52/openapi.yaml
+          npm ci --prefix eng --ignore-scripts --no-audit --no-fund
+          node eng/generate-models.mjs "$RUNNER_TEMP/openapi.yaml" "$RUNNER_TEMP/Models.g.cs"
+          diff --unified src/Heyrafiki/Models.g.cs "$RUNNER_TEMP/Models.g.cs"
+
+      - name: Restore
+        run: dotnet restore Heyrafiki.sln --locked-mode
+
+      - name: Verify formatting
+        run: dotnet format Heyrafiki.sln --verify-no-changes --no-restore
+
+      - name: Build
+        run: dotnet build Heyrafiki.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test Heyrafiki.sln --configuration Release --no-build --collect:"XPlat Code Coverage"
+
+      - name: Pack
+        run: dotnet pack src/Heyrafiki/Heyrafiki.csproj --configuration Release --no-build --output artifacts
+
+      - name: Inspect package contents
+        shell: bash
+        run: |
+          package=$(find artifacts -maxdepth 1 -name 'Heyrafiki.*.nupkg' ! -name '*.symbols.nupkg' | head -n 1)
+          test -n "$package"
+          unzip -Z1 "$package" | sort
+          if unzip -Z1 "$package" | grep -E '(TestResults|\.env|\.git|eng/|tests/)'; then
+            echo "Unexpected package content" >&2
+            exit 1
+          fi
+
+      - name: Audit engineering dependencies
+        run: npm audit --prefix eng --audit-level=high

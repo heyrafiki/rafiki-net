@@ -1,0 +1,11 @@
+{
+  "name": "@heyrafiki/dotnet-sdk-engineering",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node generate-models.mjs"
+  },
+  "dependencies": {
+    "js-yaml": "4.1.0"
+  }
+}
