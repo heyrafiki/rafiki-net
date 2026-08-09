@@ -1,6 +1,7 @@
 {
-  "source": "https://github.com/heyrafiki/openapi/blob/327e0a70de92771d3930380ce552c00e0ed8fc52/openapi.yaml",
-  "commit": "327e0a70de92771d3930380ce552c00e0ed8fc52",
+  "source": "https://github.com/heyrafiki/openapi/blob/e629a129462d82534a5e3ed16035da863305d283/openapi.yaml",
+  "commit": "e629a129462d82534a5e3ed16035da863305d283",
+  "sha256": "d1c7349246e766aaf961e11c591a32de0afcc5900649be462e3656059722b211",
   "apiVersion": "1.0.0",
   "operations": [
     "getApi",

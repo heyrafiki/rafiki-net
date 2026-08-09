@@ -5,9 +5,8 @@ The SDK is a source preview. No NuGet package has been published.
 ## Release gates
 
 1. The repository plan allocates `heyrafiki/heyrafiki-dotnet` and names a release owner.
-2. The public OpenAPI `info.license.name` and `info.license.identifier` fields are
-   reconciled with the repository's Apache-2.0 `LICENSE`. They currently state
-   `All rights reserved` and `LicenseRef-Heyrafiki-Proprietary`.
+2. The pinned OpenAPI revision is on `main`, its SHA-256 digest matches the lock,
+   and `info.license` declares `Apache 2.0` with identifier `Apache-2.0`.
 3. Generated models match the pinned OpenAPI revision and all 30 operations have focused transport tests.
 4. Formatting, build, tests, package validation and package-content inspection pass from a clean checkout.
 5. The version and changelog are updated together. Preview versions retain a SemVer prerelease suffix.

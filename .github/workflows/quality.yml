@@ -43,7 +43,9 @@ jobs:
         run: |
           curl --fail --silent --show-error --location \
             --output "$RUNNER_TEMP/openapi.yaml" \
-            https://raw.githubusercontent.com/heyrafiki/openapi/327e0a70de92771d3930380ce552c00e0ed8fc52/openapi.yaml
+            https://raw.githubusercontent.com/heyrafiki/openapi/e629a129462d82534a5e3ed16035da863305d283/openapi.yaml
+          echo "d1c7349246e766aaf961e11c591a32de0afcc5900649be462e3656059722b211  $RUNNER_TEMP/openapi.yaml" \
+            | sha256sum --check --strict
           npm ci --prefix eng --ignore-scripts --no-audit --no-fund
           node eng/generate-models.mjs "$RUNNER_TEMP/openapi.yaml" "$RUNNER_TEMP/Models.g.cs"
           diff --unified src/Heyrafiki/Models.g.cs "$RUNNER_TEMP/Models.g.cs"
