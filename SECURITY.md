@@ -2,7 +2,9 @@
 
 Do not report security vulnerabilities through a public issue.
 
-Email [security@heyrafiki.space](mailto:security@heyrafiki.space) with:
+Follow the private reporting path in the
+[Heyrafiki security policy](https://github.com/heyrafiki/.github/security/policy)
+with:
 
 - the affected version;
 - steps to reproduce;
@@ -10,8 +12,8 @@ Email [security@heyrafiki.space](mailto:security@heyrafiki.space) with:
 - any known impact.
 
 Remove API keys, personal information, health information and production payloads
-before sending a report. We will acknowledge receipt within 14 days and coordinate
-disclosure when a fix is available.
+before sending a report. We coordinate disclosure through the private reporting
+channel.
 
-Supported versions will be listed here after the first package release. Until
-then, use the latest source-preview revision.
+The default branch and tagged releases receive security fixes according to the
+shared policy.

@@ -2,23 +2,23 @@
 
 Typed .NET client for the Heyrafiki API.
 
-> Source Preview. Use with Sandbox projects. The NuGet package has not been published.
-
 The client supports .NET Standard 2.0, .NET 8 and .NET 10. Keep API keys on the
 server.
 
 ## Build from source
 
 ```bash
+git clone https://github.com/heyrafiki/rafiki-net.git
+cd rafiki-net
 dotnet restore
 dotnet build -c Release
 dotnet test -c Release
 ```
 
-Add a project reference while the package remains in source preview:
+Add a project reference from the checked-out source:
 
 ```xml
-<ProjectReference Include="../heyrafiki-dotnet/src/Heyrafiki/Heyrafiki.csproj" />
+<ProjectReference Include="../rafiki-net/src/Heyrafiki/Heyrafiki.csproj" />
 ```
 
 ## First request
@@ -117,8 +117,8 @@ not expose raw response content.
 
 ## Contract
 
-This source preview is built from the published
-[Heyrafiki OpenAPI 1.0 contract](https://github.com/heyrafiki/openapi). The pinned
+This client is built from the published
+[Heyrafiki OpenAPI 1.0 contract](https://github.com/heyrafiki/contract). The pinned
 contract revision and operation list are recorded in `eng/openapi.lock.json`.
 
 The client intentionally has no automatic pagination because the current list
@@ -136,7 +136,8 @@ dotnet pack src/Heyrafiki/Heyrafiki.csproj -c Release -o artifacts
 ## Resources
 
 - [Documentation](https://docs.heyrafiki.space)
-- [API contract](https://github.com/heyrafiki/openapi)
+- [API contract](https://github.com/heyrafiki/contract)
+- [Open insurance assurance benchmark](https://github.com/heyrafiki/proving-ground)
 - [Webhooks](https://docs.heyrafiki.space/webhooks)
 - [Security](./SECURITY.md)
 
