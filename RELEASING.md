@@ -1,10 +1,8 @@
 # Release process
 
-The SDK is a source preview. No NuGet package has been published.
-
 ## Release gates
 
-1. The repository plan allocates `heyrafiki/heyrafiki-dotnet` and names a release owner.
+1. `heyrafiki/rafiki-net` has a named release owner and protected `main` branch.
 2. The pinned OpenAPI revision is on `main`, its SHA-256 digest matches the lock,
    and `info.license` declares `Apache 2.0` with identifier `Apache-2.0`.
 3. Generated models match the pinned OpenAPI revision and all 30 operations have focused transport tests.
@@ -32,6 +30,5 @@ dotnet test -c Release --no-build
 dotnet pack src/Heyrafiki/Heyrafiki.csproj -c Release --no-build -o artifacts
 ```
 
-Inspect the `.nupkg` and `.snupkg`, then create a signed GitHub prerelease tagged
-`sdk-v<version>`. NuGet publication stays disabled until every release gate above
-is verified.
+Inspect the `.nupkg` and `.snupkg`, then create a signed GitHub release tagged
+`sdk-v<version>`. Publish only after every release gate above is verified.

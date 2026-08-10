@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0-beta.1 - Unreleased
+## 0.1.0-beta.1 - 2026-08-10
 
 - Added typed clients for every operation in the Heyrafiki OpenAPI 1.0 contract.
 - Added Bearer and `x-api-key` authentication.

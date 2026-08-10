@@ -9,7 +9,7 @@ namespace Heyrafiki.Internal;
 
 internal sealed class HeyrafikiTransport
 {
-    private const string UserAgent = "heyrafiki-dotnet/0.1.0-beta.1";
+    private const string UserAgent = "rafiki-net/0.1.0-beta.1";
     private static readonly Random RetryJitter = new();
     private readonly HttpClient _httpClient;
     private readonly HeyrafikiClientOptions _options;

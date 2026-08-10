@@ -13,10 +13,10 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://docs.heyrafiki.space/sdks</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/heyrafiki/heyrafiki-dotnet</RepositoryUrl>
+    <RepositoryUrl>https://github.com/heyrafiki/rafiki-net</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageReleaseNotes>Source preview for Sandbox projects.</PackageReleaseNotes>
+    <PackageReleaseNotes>Typed API version 1 client for Sandbox projects.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
