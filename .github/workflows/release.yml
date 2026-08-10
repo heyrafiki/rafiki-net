@@ -1,0 +1,75 @@
+name: Publish NuGet package
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: startsWith(github.event.release.tag_name, 'v')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      DOTNET_NOLOGO: "1"
+    steps:
+      - name: Check out release tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Use .NET SDK
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: "**/packages.lock.json"
+      - name: Verify release tag
+        shell: bash
+        run: |
+          version=$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' src/Heyrafiki/Heyrafiki.csproj)
+          test -n "$version"
+          test "$GITHUB_REF_NAME" = "v$version"
+      - name: Restore, build and test
+        run: |
+          dotnet restore Heyrafiki.sln --locked-mode
+          dotnet build Heyrafiki.sln --configuration Release --no-restore
+          dotnet test Heyrafiki.sln --configuration Release --no-build
+      - name: Pack release artifacts
+        run: dotnet pack src/Heyrafiki/Heyrafiki.csproj --configuration Release --no-build --output artifacts
+      - name: Retain release artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: heyrafiki-dotnet-${{ github.event.release.tag_name }}
+          path: |
+            artifacts/*.nupkg
+            artifacts/*.snupkg
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: nuget-release
+      url: https://www.nuget.org/packages/Heyrafiki/
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Retrieve verified packages
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: heyrafiki-dotnet-${{ github.event.release.tag_name }}
+          path: artifacts
+      - name: Request a short-lived NuGet credential
+        id: login
+        uses: NuGet/login@e12aa70ccb4d344b799c19f5ceef68a8fb96164d # v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+      - name: Publish package and symbols
+        run: >-
+          dotnet nuget push "artifacts/*.nupkg"
+          --api-key "${{ steps.login.outputs.NUGET_API_KEY }}"
+          --source https://api.nuget.org/v3/index.json
