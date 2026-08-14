@@ -68,7 +68,7 @@ jobs:
       - name: Inspect package contents
         shell: bash
         run: |
-          package=$(find artifacts -maxdepth 1 -name 'Heyrafiki.*.nupkg' ! -name '*.symbols.nupkg' | head -n 1)
+          package=$(find artifacts -maxdepth 1 -name 'heyrafiki.*.nupkg' ! -name '*.symbols.nupkg' | head -n 1)
           test -n "$package"
           unzip -Z1 "$package" | sort
           if unzip -Z1 "$package" | grep -E '(TestResults|\.env|\.git|eng/|tests/)'; then
