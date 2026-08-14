@@ -3,7 +3,7 @@
     <TargetFrameworks>netstandard2.0;net8.0;net10.0</TargetFrameworks>
     <AssemblyName>Heyrafiki</AssemblyName>
     <RootNamespace>Heyrafiki</RootNamespace>
-    <PackageId>Heyrafiki</PackageId>
+    <PackageId>heyrafiki</PackageId>
     <Version>0.1.0-beta.1</Version>
     <Title>Heyrafiki .NET SDK</Title>
     <Description>Typed .NET client for the Heyrafiki API.</Description>

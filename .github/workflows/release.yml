@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-24.04
     environment:
       name: nuget-release
-      url: https://www.nuget.org/packages/Heyrafiki/
+      url: https://www.nuget.org/packages/heyrafiki/
     permissions:
       contents: read
       id-token: write
