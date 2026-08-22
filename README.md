@@ -2,12 +2,12 @@
 
 Typed .NET client for the Heyrafiki API.
 
-## Where this fits
+## What this SDK is for
 
-This SDK is the typed .NET entrypoint to Heyrafiki's versioned REST contract.
-It helps applications participate in governed Mental Healthcare workflows while
-authorization, Consent, clinical authority and financial decisions remain
-server-owned.
+Use this SDK to call the Heyrafiki API from a .NET service. It provides typed
+requests, predictable errors and idempotency support for retried writes. The
+platform applies access rules; clinical and financial decisions remain with the
+accountable people and organizations.
 
 The client supports .NET Standard 2.0, .NET 8 and .NET 10. Keep API keys on the
 server.
