@@ -87,6 +87,33 @@ await heyrafiki.Preauthorizations.CreateAsync(
 
 Amounts use the currency's minor unit. `350000` KES is KES 3,500.00.
 
+## Claim valuation
+
+`Claims.RetrieveValuationAsync` reproduces what a Claim was worth at a point in
+time. The cutoff is explicit, and Heyrafiki includes only the facts whose business
+time and knowledge time both fall on or before it, so the same cutoff returns the
+same answer however much later you ask.
+
+```csharp
+var valuation = await heyrafiki.Claims.RetrieveValuationAsync(
+    "clm_demo_001",
+    valuationAt: new DateTimeOffset(2026, 8, 12, 9, 0, 0, TimeSpan.Zero));
+
+Console.WriteLine($"{valuation.Status} {valuation.Currency} {valuation.Amount.Outstanding}");
+
+foreach (var record in valuation.Events)
+{
+    Console.WriteLine(
+        $"{record.Sequence} {record.Type} effective {record.EffectiveAt:O} recorded {record.RecordedAt:O}");
+}
+```
+
+`EffectiveAt` is when the underlying fact took effect. `RecordedAt` is when
+Heyrafiki persisted it. `Amount.Outstanding` is payer liability less the
+settlement an authorized observation confirmed. The cutoff travels with the offset
+you supply, and a default `DateTimeOffset` is rejected because an unset cutoff is
+not a reproducible one.
+
 ## Authentication
 
 Bearer authentication is the default. Clients that cannot set the Authorization

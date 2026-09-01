@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Heyrafiki.Internal;
@@ -24,6 +25,13 @@ internal static class Guard
     {
         if (limit is < 1 or > 100) throw new ArgumentOutOfRangeException(nameof(limit), "limit must be between 1 and 100.");
         return limit;
+    }
+
+    internal static string Timestamp(DateTimeOffset value, string parameterName)
+    {
+        if (value == default)
+            throw new ArgumentException($"{parameterName} must be an explicit cutoff.", parameterName);
+        return value.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFFK", CultureInfo.InvariantCulture);
     }
 
     internal static string IdempotencyKey(string value)

@@ -1,7 +1,7 @@
 {
-  "source": "https://github.com/heyrafiki/contract/blob/e629a129462d82534a5e3ed16035da863305d283/openapi.yaml",
-  "commit": "e629a129462d82534a5e3ed16035da863305d283",
-  "sha256": "d1c7349246e766aaf961e11c591a32de0afcc5900649be462e3656059722b211",
+  "source": "https://github.com/heyrafiki/contract/blob/62c32d1b99ddded0cfe0baf8ddc57bcbaa764167/openapi.yaml",
+  "commit": "62c32d1b99ddded0cfe0baf8ddc57bcbaa764167",
+  "sha256": "cf2747ba4282bc79e81f69aca66937de78f067266e3dd5651edecdf531863dda",
   "apiVersion": "1.0.0",
   "operations": [
     "getApi",
@@ -23,6 +23,7 @@
     "listClaims",
     "createClaim",
     "getClaim",
+    "getClaimValuation",
     "createClaimInformationRequest",
     "submitClaimEvidence",
     "adjudicateClaim",
