@@ -4,7 +4,7 @@
     <AssemblyName>Heyrafiki</AssemblyName>
     <RootNamespace>Heyrafiki</RootNamespace>
     <PackageId>heyrafiki</PackageId>
-    <Version>0.1.0-beta.1</Version>
+    <Version>0.1.0-beta.2</Version>
     <Title>Heyrafiki .NET SDK</Title>
     <Description>Typed .NET client for the Heyrafiki API.</Description>
     <Authors>Heyrafiki</Authors>

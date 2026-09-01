@@ -43,8 +43,8 @@ jobs:
         run: |
           curl --fail --silent --show-error --location \
             --output "$RUNNER_TEMP/openapi.yaml" \
-            https://raw.githubusercontent.com/heyrafiki/contract/e629a129462d82534a5e3ed16035da863305d283/openapi.yaml
-          echo "d1c7349246e766aaf961e11c591a32de0afcc5900649be462e3656059722b211  $RUNNER_TEMP/openapi.yaml" \
+            https://raw.githubusercontent.com/heyrafiki/contract/62c32d1b99ddded0cfe0baf8ddc57bcbaa764167/openapi.yaml
+          echo "cf2747ba4282bc79e81f69aca66937de78f067266e3dd5651edecdf531863dda  $RUNNER_TEMP/openapi.yaml" \
             | sha256sum --check --strict
           npm ci --prefix eng --ignore-scripts --no-audit --no-fund
           node eng/generate-models.mjs "$RUNNER_TEMP/openapi.yaml" "$RUNNER_TEMP/Models.g.cs"

@@ -5,7 +5,7 @@
 1. `heyrafiki/rafiki-net` has a named release owner and protected `main` branch.
 2. The pinned OpenAPI revision is on `main`, its SHA-256 digest matches the lock,
    and `info.license` declares `Apache 2.0` with identifier `Apache-2.0`.
-3. Generated models match the pinned OpenAPI revision and all 30 operations have focused transport tests.
+3. Generated models match the pinned OpenAPI revision and all 31 operations have focused transport tests.
 4. Formatting, build, tests, package validation and package-content inspection pass from a clean checkout.
 5. The version and changelog are updated together. Preview versions retain a SemVer prerelease suffix.
 6. Branch protection, CODEOWNERS, secret scanning, dependency review and required checks are active.

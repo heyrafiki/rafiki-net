@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-beta.2 - 2026-08-28
+
+- Added `Claims.RetrieveValuationAsync` for `GET /claims/{claim_id}/valuation`.
+- Added the `ClaimValuation`, `ClaimValuationAmount` and `ClaimValuationEvent` models.
+- Required an explicit `valuationAt` cutoff and sent it as the caller's own offset.
+- Repinned the contract lock to the revision that publishes Claim valuation.
+
 ## 0.1.0-beta.1 - 2026-08-10
 
 - Added typed clients for every operation in the Heyrafiki OpenAPI 1.0 contract.

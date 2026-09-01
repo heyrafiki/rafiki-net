@@ -157,6 +157,16 @@ public sealed class ClaimsClient
     public Task<Claim> RetrieveAsync(string claimId, CancellationToken cancellationToken = default) =>
         _transport.GetAsync<Claim>($"/claims/{Guard.Escape(Guard.Identifier(claimId, "clm_", nameof(claimId)))}", cancellationToken);
 
+    /// <summary>Reproduces a Claim valuation from the state known at an inclusive business-time and knowledge-time cutoff.</summary>
+    public Task<ClaimValuation> RetrieveValuationAsync(
+        string claimId,
+        DateTimeOffset valuationAt,
+        CancellationToken cancellationToken = default) =>
+        _transport.GetAsync<ClaimValuation>(
+            $"/claims/{Guard.Escape(Guard.Identifier(claimId, "clm_", nameof(claimId)))}/valuation"
+                + $"?valuation_at={Guard.Escape(Guard.Timestamp(valuationAt, nameof(valuationAt)))}",
+            cancellationToken);
+
     /// <summary>Submits a Claim from delivered Care and Benefit evidence.</summary>
     public Task<Claim> CreateAsync(ClaimInput input, string idempotencyKey, CancellationToken cancellationToken = default) =>
         _transport.PostAsync<Claim>("/claims", Guard.Input(input, nameof(input)), Guard.IdempotencyKey(idempotencyKey), null, true, cancellationToken);

@@ -24,7 +24,7 @@ public sealed class ClientTests
         Assert.Equal("https://api.heyrafiki.space/v1/practitioners?limit=10", request.Uri.ToString());
         Assert.Equal("Bearer", request.AuthorizationScheme);
         Assert.Equal("test_api_key", request.AuthorizationParameter);
-        Assert.Equal("rafiki-net/0.1.0-beta.1", request.UserAgent);
+        Assert.Equal("rafiki-net/0.1.0-beta.2", request.UserAgent);
     }
 
     [Fact]
@@ -206,7 +206,7 @@ public sealed class ClientTests
     [Fact]
     public async Task ImplementsEveryPublishedOperationWithoutAdditionalRoutes()
     {
-        var handler = new RecordingHandler(Enumerable.Range(0, 30)
+        var handler = new RecordingHandler(Enumerable.Range(0, 31)
             .Select(_ => Response(HttpStatusCode.OK, "{}"))
             .ToArray());
         using var httpClient = new HttpClient(handler);
@@ -232,6 +232,7 @@ public sealed class ClientTests
         await client.Claims.ListAsync();
         await client.Claims.CreateAsync(new ClaimInput(), key);
         await client.Claims.RetrieveAsync("clm_1");
+        await client.Claims.RetrieveValuationAsync("clm_1", ValuationCutoff);
         await client.Claims.RequestInformationAsync("clm_1", new ClaimInformationRequestInput(), key);
         await client.Claims.SubmitEvidenceAsync("clm_1", new ClaimEvidenceInput(), key);
         await client.Claims.AdjudicateAsync("clm_1", new ClaimAdjudicationInput(), key);
@@ -266,6 +267,7 @@ public sealed class ClientTests
             "GET /v1/claims?limit=20",
             "POST /v1/claims",
             "GET /v1/claims/clm_1",
+            "GET /v1/claims/clm_1/valuation?valuation_at=2026-08-12T09%3A00%3A00%2B00%3A00",
             "POST /v1/claims/clm_1/information_requests",
             "POST /v1/claims/clm_1/evidence",
             "POST /v1/claims/clm_1/adjudications",
@@ -284,6 +286,97 @@ public sealed class ClientTests
         Assert.All(idempotentWrites, request => Assert.Equal(key, request.IdempotencyKey));
     }
 
+    [Fact]
+    public async Task ReproducesAClaimValuationAtAnExplicitCutoff()
+    {
+        var handler = new RecordingHandler(Response(HttpStatusCode.OK, ClaimValuationJson));
+        using var httpClient = new HttpClient(handler);
+        using var client = CreateClient(httpClient);
+
+        var valuation = await client.Claims.RetrieveValuationAsync("clm_demo_001", ValuationCutoff);
+
+        var request = Assert.Single(handler.Requests);
+        Assert.Equal(HttpMethod.Get, request.Method);
+        Assert.Equal(
+            "/v1/claims/clm_demo_001/valuation?valuation_at=2026-08-12T09%3A00%3A00%2B00%3A00",
+            request.Uri.PathAndQuery);
+
+        Assert.Equal("claim_valuation", valuation.Object);
+        Assert.Equal("clm_demo_001", valuation.ClaimId);
+        Assert.Equal(ValuationCutoff, valuation.ValuationAt);
+        Assert.Equal("partially_approved", valuation.Status);
+        Assert.Equal("KES", valuation.Currency);
+        Assert.Equal(350000, valuation.Amount.Billed);
+        Assert.Equal(280000, valuation.Amount.PayerLiability);
+        Assert.Equal(280000, valuation.Amount.Remitted);
+        Assert.Equal(100000, valuation.Amount.Settled);
+        Assert.Equal(180000, valuation.Amount.Outstanding);
+        Assert.Equal("2026.07", valuation.Policy?.Version);
+    }
+
+    [Fact]
+    public async Task ExposesBusinessTimeAndKnowledgeTimeForEveryValuationEvent()
+    {
+        var handler = new RecordingHandler(Response(HttpStatusCode.OK, ClaimValuationJson));
+        using var httpClient = new HttpClient(handler);
+        using var client = CreateClient(httpClient);
+
+        var valuation = await client.Claims.RetrieveValuationAsync("clm_demo_001", ValuationCutoff);
+
+        Assert.Equal([1L, 2L, 3L], valuation.Events.Select(each => each.Sequence));
+        Assert.All(valuation.Events, each =>
+        {
+            Assert.True(each.EffectiveAt <= ValuationCutoff);
+            Assert.True(each.RecordedAt <= ValuationCutoff);
+        });
+        Assert.Equal("benefit_limit", valuation.Events[1].ReasonCode);
+        Assert.Null(valuation.Events[0].ReasonCode);
+        Assert.Equal("evidence:remittance:001", Assert.Single(valuation.Events[2].EvidenceReferences));
+    }
+
+    [Fact]
+    public async Task SendsTheValuationCutoffOffsetTheCallerSupplied()
+    {
+        var handler = new RecordingHandler(Response(HttpStatusCode.OK, ClaimValuationJson));
+        using var httpClient = new HttpClient(handler);
+        using var client = CreateClient(httpClient);
+
+        await client.Claims.RetrieveValuationAsync(
+            "clm_demo_001",
+            new DateTimeOffset(2026, 8, 12, 12, 0, 0, TimeSpan.FromHours(3)));
+
+        Assert.Equal(
+            "/v1/claims/clm_demo_001/valuation?valuation_at=2026-08-12T12%3A00%3A00%2B03%3A00",
+            Assert.Single(handler.Requests).Uri.PathAndQuery);
+    }
+
+    [Fact]
+    public async Task RejectsAValuationWithoutAnExplicitCutoff()
+    {
+        using var client = CreateClient(new HttpClient(new RecordingHandler()));
+
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            client.Claims.RetrieveValuationAsync("clm_demo_001", default));
+    }
+
+    [Fact]
+    public async Task RetriesClaimValuationReadsOnServiceUnavailable()
+    {
+        var handler = new RecordingHandler(
+            Response(HttpStatusCode.ServiceUnavailable, ErrorJson),
+            Response(HttpStatusCode.OK, ClaimValuationJson));
+        using var httpClient = new HttpClient(handler);
+        using var client = CreateClient(httpClient, maxRetries: 1);
+
+        await client.Claims.RetrieveValuationAsync("clm_demo_001", ValuationCutoff);
+
+        Assert.Equal(2, handler.Requests.Count);
+        Assert.All(handler.Requests, request =>
+            Assert.Equal(
+                "/v1/claims/clm_demo_001/valuation?valuation_at=2026-08-12T09%3A00%3A00%2B00%3A00",
+                request.Uri.PathAndQuery));
+    }
+
     private static HeyrafikiClient CreateClient(HttpClient httpClient, int maxRetries = 0) =>
         new(new HeyrafikiClientOptions
         {
@@ -298,8 +391,12 @@ public sealed class ClientTests
         Content = new StringContent(body, Encoding.UTF8, "application/json"),
     };
 
+    private static readonly DateTimeOffset ValuationCutoff =
+        new(2026, 8, 12, 9, 0, 0, TimeSpan.Zero);
+
     private const string ErrorJson = "{\"error\":{\"code\":\"service_unavailable\",\"message\":\"Try again.\",\"docs\":\"https://docs.heyrafiki.space/errors\"}}";
     private const string BookingJson = "{\"id\":\"bkg_demo_001\",\"object\":\"booking\",\"session_id\":\"ses_demo_001\",\"practitioner_id\":\"prc_2481\",\"starts_at\":\"2026-08-12T07:00:00Z\",\"ends_at\":\"2026-08-12T08:00:00Z\",\"timezone\":\"Africa/Nairobi\",\"format\":\"online\",\"status\":\"reserved\",\"payment_source\":\"covered\"}";
+    private const string ClaimValuationJson = "{\"id\":\"clm_demo_001:2026-08-12T09:00:00Z\",\"object\":\"claim_valuation\",\"claim_id\":\"clm_demo_001\",\"valuation_at\":\"2026-08-12T09:00:00Z\",\"currency\":\"KES\",\"status\":\"partially_approved\",\"amount\":{\"billed\":350000,\"payer_liability\":280000,\"patient_responsibility\":70000,\"adjustment\":0,\"remitted\":280000,\"settled\":100000,\"outstanding\":180000},\"policy\":{\"reference\":\"payer:policy:outpatient-mental-health\",\"version\":\"2026.07\"},\"events\":[{\"sequence\":1,\"type\":\"submitted\",\"effective_at\":\"2026-08-12T08:01:00Z\",\"recorded_at\":\"2026-08-12T08:01:05Z\",\"previous_status\":\"draft\",\"next_status\":\"submitted\",\"reason_code\":null,\"evidence_references\":[]},{\"sequence\":2,\"type\":\"partially_approved\",\"effective_at\":\"2026-08-12T08:40:00Z\",\"recorded_at\":\"2026-08-12T08:41:00Z\",\"previous_status\":\"submitted\",\"next_status\":\"partially_approved\",\"reason_code\":\"benefit_limit\",\"evidence_references\":[\"evidence:adjudication:001\"]},{\"sequence\":3,\"type\":\"remittance_recorded\",\"effective_at\":\"2026-08-12T08:55:00Z\",\"recorded_at\":\"2026-08-12T08:56:00Z\",\"previous_status\":\"partially_approved\",\"next_status\":\"partially_approved\",\"reason_code\":null,\"evidence_references\":[\"evidence:remittance:001\"]}]}";
     private const string ClaimJson = "{\"id\":\"clm_demo_001\",\"object\":\"claim\",\"status\":\"queried\",\"provider_claim_reference\":\"provider:claim:001\",\"submission_version\":1,\"amount\":{\"currency\":\"KES\",\"billed\":350000,\"approved\":null,\"remitted\":null,\"settled\":null},\"service_period\":{\"starts_at\":\"2026-08-12T07:00:00Z\",\"ends_at\":\"2026-08-12T08:00:00Z\"},\"lines\":[],\"information_requests\":[],\"adjudication\":null,\"submitted_at\":\"2026-08-12T08:01:00Z\",\"updated_at\":\"2026-08-12T08:01:00Z\"}";
 
     private sealed class RecordingHandler(params HttpResponseMessage[] responses) : HttpMessageHandler
