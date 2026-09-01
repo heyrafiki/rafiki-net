@@ -24,7 +24,7 @@ public sealed class ClientTests
         Assert.Equal("https://api.heyrafiki.space/v1/practitioners?limit=10", request.Uri.ToString());
         Assert.Equal("Bearer", request.AuthorizationScheme);
         Assert.Equal("test_api_key", request.AuthorizationParameter);
-        Assert.Equal("rafiki-net/0.1.0-beta.2", request.UserAgent);
+        Assert.Equal("rafiki-net/0.1.0-beta.3", request.UserAgent);
     }
 
     [Fact]

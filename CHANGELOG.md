@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-beta.3 - 2026-09-01
+
+- Reissued the Claim valuation release through repaired short-lived NuGet trusted publishing.
+
 ## 0.1.0-beta.2 - 2026-08-28
 
 - Added `Claims.RetrieveValuationAsync` for `GET /claims/{claim_id}/valuation`.
