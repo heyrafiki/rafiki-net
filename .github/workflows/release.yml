@@ -3,13 +3,19 @@ name: Publish NuGet package
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to rebuild and publish
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 jobs:
   build:
-    if: startsWith(github.event.release.tag_name, 'v')
+    if: startsWith(inputs.tag || github.event.release.tag_name, 'v')
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     env:
@@ -19,6 +25,7 @@ jobs:
       - name: Check out release tag
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.tag || github.event.release.tag_name }}
           persist-credentials: false
       - name: Use .NET SDK
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
@@ -28,10 +35,12 @@ jobs:
           cache-dependency-path: "**/packages.lock.json"
       - name: Verify release tag
         shell: bash
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
         run: |
           version=$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' src/Heyrafiki/Heyrafiki.csproj)
           test -n "$version"
-          test "$GITHUB_REF_NAME" = "v$version"
+          test "$RELEASE_TAG" = "v$version"
       - name: Restore, build and test
         run: |
           dotnet restore Heyrafiki.sln --locked-mode
@@ -42,7 +51,7 @@ jobs:
       - name: Retain release artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: rafiki-net-${{ github.event.release.tag_name }}
+          name: rafiki-net-${{ inputs.tag || github.event.release.tag_name }}
           path: |
             artifacts/*.nupkg
             artifacts/*.snupkg
@@ -61,11 +70,11 @@ jobs:
       - name: Retrieve verified packages
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: rafiki-net-${{ github.event.release.tag_name }}
+          name: rafiki-net-${{ inputs.tag || github.event.release.tag_name }}
           path: artifacts
       - name: Request a short-lived NuGet credential
         id: login
-        uses: NuGet/login@e12aa70ccb4d344b799c19f5ceef68a8fb96164d # v1
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
         with:
           user: ${{ vars.NUGET_USER }}
       - name: Publish package and symbols
